@@ -12,6 +12,7 @@ from utils.image import flip, color_aug
 from utils.image import get_affine_transform, affine_transform
 from utils.image import gaussian_radius, draw_umich_gaussian, draw_msra_gaussian
 from utils.image import draw_dense_reg
+from utils.noise import random_aug
 import math
 
 class MultiPoseDataset(data.Dataset):
@@ -27,14 +28,14 @@ class MultiPoseDataset(data.Dataset):
     return border // i
 
   def __getitem__(self, index):
-    img_id = self.images[index]
+    img_id = self.images[index] # get image name
     file_name = self.coco.loadImgs(ids=[img_id])[0]['file_name']
     img_path = os.path.join(self.img_dir, file_name)
     ann_ids = self.coco.getAnnIds(imgIds=[img_id])
     anns = self.coco.loadAnns(ids=ann_ids)
     num_objs = min(len(anns), self.max_objs)
 
-    img = cv2.imread(img_path)
+    img = random_aug(cv2.imread(img_path))
 
     height, width = img.shape[0], img.shape[1]
     c = np.array([img.shape[1] / 2., img.shape[0] / 2.], dtype=np.float32)
@@ -43,7 +44,11 @@ class MultiPoseDataset(data.Dataset):
 
     flipped = False
     if self.split == 'train':
+      # add guassian noise
+
+      # adding augmentation here
       if not self.opt.not_rand_crop:
+        # random crop
         s = s * np.random.choice(np.arange(0.6, 1.4, 0.1))
         w_border = self._get_border(128, img.shape[1])
         h_border = self._get_border(128, img.shape[0])
@@ -55,11 +60,14 @@ class MultiPoseDataset(data.Dataset):
         c[0] += s * np.clip(np.random.randn()*cf, -2*cf, 2*cf)
         c[1] += s * np.clip(np.random.randn()*cf, -2*cf, 2*cf)
         s = s * np.clip(np.random.randn()*sf + 1, 1 - sf, 1 + sf)
+      
       if np.random.random() < self.opt.aug_rot:
+        # random rotate
         rf = self.opt.rotate
         rot = np.clip(np.random.randn()*rf, -rf*2, rf*2)
 
       if np.random.random() < self.opt.flip:
+        # random flip
         flipped = True
         img = img[:, ::-1, :]
         c[0] =  width - c[0] - 1
