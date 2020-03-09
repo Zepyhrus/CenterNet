@@ -20,7 +20,9 @@ def random_noise(img):
     if mode is None:
         return img
     else:
-        return skimage.util.random_noise(img, mode=mode)
+        img_noised = skimage.util.random_noise(img, mode=mode)
+
+        return (img_noised*255).astype(np.uint8)
 
 
 def random_blur(img):
@@ -42,5 +44,5 @@ def random_blur(img):
         raise 'wrong blur mode!'
 
 
-def random_aug(img):
+def random_aug(img):    
     return random_noise(random_blur(img))

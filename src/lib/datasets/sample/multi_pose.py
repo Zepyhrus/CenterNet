@@ -35,7 +35,8 @@ class MultiPoseDataset(data.Dataset):
     anns = self.coco.loadAnns(ids=ann_ids)
     num_objs = min(len(anns), self.max_objs)
 
-    img = random_aug(cv2.imread(img_path))
+    img = cv2.imread(img_path)
+    img = random_aug(img)
 
     height, width = img.shape[0], img.shape[1]
     c = np.array([img.shape[1] / 2., img.shape[0] / 2.], dtype=np.float32)

@@ -16,7 +16,8 @@ add_path('src/lib')
 from opts import opts
 from datasets.dataset.coco_hp import COCOHP
 from datasets.sample.multi_pose import MultiPoseDataset
-from models.model import create_model
+from models.networks.pose_dla_dcn import get_pose_net
+
 
 # initialize options
 opt = opts().parse(['multi_pose', '--batch_size', '1'])
@@ -38,10 +39,10 @@ train_loader = torch.utils.data.DataLoader(
   drop_last=True
 )
 
+model = get_pose_net(34, opt.heads, opt.head_conv)
 
 
-
-
+print(model)
 
 
 
